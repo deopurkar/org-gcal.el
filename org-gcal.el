@@ -292,7 +292,7 @@
                                            (save-excursion (outline-next-heading) (point)))
                         (goto-char (match-beginning 0))
                         (org-element-timestamp-parser)))
-           (smry (org-element-property :title elem))
+           (smry (concat (org-element-property :title elem) " :copy:"))
            (loc  (org-element-property :LOCATION elem))
            (id  (org-element-property :ID elem))
            (start (org-gcal--format-org2iso
