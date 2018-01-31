@@ -97,6 +97,7 @@
                        `(const :tag ,c ,c))
                             '("org.png" "emacs.png"))))
 
+
 (defcustom org-gcal-fetch-event-filters '()
   "Predicate functions to filter calendar events.
    Predicate functions take an event, and if they return `nil' the
@@ -310,7 +311,7 @@
                  (plist-get (cadr tobj) :minute-end)
                  (when (plist-get (cadr tobj) :hour-start)
                    t)))
-           (desc  "")) ;; For now, no description.
+           (desc  "Uploaded from org")) ;; For now, no description.
       (org-gcal--post-event start end smry loc desc id nil skip-import))))
 
 (defun org-gcal-delete-at-point (&optional skip-import)
