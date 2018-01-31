@@ -310,14 +310,7 @@
                  (plist-get (cadr tobj) :minute-end)
                  (when (plist-get (cadr tobj) :hour-start)
                    t)))
-           (desc  (if (plist-get (cadr elem) :contents-begin)
-                      (replace-regexp-in-string
-                       "\\`\\(?: *<[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9].*?>$\\)\n?\n?" ""
-                       (replace-regexp-in-string
-                        " *:PROPERTIES:\n  \\(.*\\(?:\n.*\\)*?\\) :END:\n\n" ""
-                        (buffer-substring-no-properties
-                         (plist-get (cadr elem) :contents-begin)
-                         (plist-get (cadr elem) :contents-end)))) "")))
+           (desc  "")) ;; For now, no description.
       (org-gcal--post-event start end smry loc desc id nil skip-import))))
 
 (defun org-gcal-delete-at-point (&optional skip-import)
