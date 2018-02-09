@@ -589,12 +589,12 @@ TO.  Instead an empty string is returned."
                (plist-get (org-gcal--parse-date end)   :mon))
             (= (plist-get (org-gcal--parse-date start) :day)
                (plist-get (org-gcal--parse-date end)   :day)))
-           (concat "\n  <"
+           (concat "\n  SCHEDULED: <"
                    (org-gcal--format-date start "%Y-%m-%d %a %H:%M")
                    "-"
                    (org-gcal--format-date end "%H:%M")
                    ">")
-         (concat "\n  " (org-gcal--format-iso2org start)
+         (concat "\n  SCHEDULED: " (org-gcal--format-iso2org start)
                  "--"
                  (org-gcal--format-iso2org
                   (if (< 11 (length end))
