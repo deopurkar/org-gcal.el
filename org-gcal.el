@@ -280,7 +280,7 @@
                                 (car (org-element-map (org-element-at-point) 'headline
                                   (lambda (hl) (org-element-property :end hl)))))))))))
 
-(defun org-gcal-post-at-point (&optional skip-import)
+(defun org-gcal-post-at-point (&optional skip-import extra-tags)
   (interactive)
   (org-gcal--ensure-token)
   (save-excursion
@@ -292,7 +292,8 @@
                                            (save-excursion (outline-next-heading) (point)))
                         (goto-char (match-beginning 0))
                         (org-element-timestamp-parser)))
-           (smry (concat (org-element-property :title elem) " :copy:"))
+           (smry (concat (org-element-property :title elem)
+			 (if extra-tags (concat " " extra-tags) "")))
            (loc  (org-element-property :LOCATION elem))
            (id  (org-element-property :ID elem))
            (start (org-gcal--format-org2iso
@@ -581,7 +582,7 @@ TO.  Instead an empty string is returned."
      "  :ID: " id "\n"
      "  :END:\n"
      (if (or (string= start end) (org-gcal--alldayp start end))
-         (concat "\n  "(org-gcal--format-iso2org start))
+         (concat "  SCHEDULED: "(org-gcal--format-iso2org start))
        (if (and
             (= (plist-get (org-gcal--parse-date start) :year)
                (plist-get (org-gcal--parse-date end)   :year))
@@ -589,12 +590,12 @@ TO.  Instead an empty string is returned."
                (plist-get (org-gcal--parse-date end)   :mon))
             (= (plist-get (org-gcal--parse-date start) :day)
                (plist-get (org-gcal--parse-date end)   :day)))
-           (concat "\n  SCHEDULED: <"
+           (concat "  SCHEDULED: <"
                    (org-gcal--format-date start "%Y-%m-%d %a %H:%M")
                    "-"
                    (org-gcal--format-date end "%H:%M")
                    ">")
-         (concat "\n  SCHEDULED: " (org-gcal--format-iso2org start)
+         (concat "  SCHEDULED: " (org-gcal--format-iso2org start)
                  "--"
                  (org-gcal--format-iso2org
                   (if (< 11 (length end))
