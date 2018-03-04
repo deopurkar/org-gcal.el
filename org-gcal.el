@@ -124,6 +124,8 @@
 
 (defconst org-gcal-events-url "https://www.googleapis.com/calendar/v3/calendars/%s/events")
 
+
+
 (defun org-gcal-sync (&optional a-token skip-export silent)
   (interactive)
   (org-gcal--ensure-token)
