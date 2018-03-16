@@ -125,7 +125,6 @@
 (defconst org-gcal-events-url "https://www.googleapis.com/calendar/v3/calendars/%s/events")
 
 
-
 (defun org-gcal-sync (&optional a-token skip-export silent)
   (interactive)
   (org-gcal--ensure-token)
@@ -330,6 +329,8 @@
       (when (and id
                  (y-or-n-p (format "Do you really want to delete event?\n\n%s\n\n" smry)))
         (org-gcal--delete-event id nil skip-import)))))
+
+
 
 (defun org-gcal-request-authorization ()
   "Request OAuth authorization at AUTH-URL by launching `browse-url'.
