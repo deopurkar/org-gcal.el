@@ -411,7 +411,7 @@ It returns the code provided by the service."
                                              (plist-get tobj :day-end)
                                              (plist-get tobj :month-end)
                                              (plist-get tobj :year-end))))
-          (org-gcal--notify "Archived event." (org-element-property :title elem))
+          ;(org-gcal--notify "Archived event." (org-element-property :title elem))
           (org-archive-subtree))))
     (save-buffer)))
 
