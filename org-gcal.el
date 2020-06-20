@@ -585,7 +585,7 @@ TO.  Instead an empty string is returned."
      "  :ID: " id "\n"
      "  :END:\n"
      (if (or (string= start end) (org-gcal--alldayp start end))
-         (concat "  SCHEDULED: "(org-gcal--format-iso2org start))
+         (org-gcal--format-iso2org start)
        (if (and
             (= (plist-get (org-gcal--parse-date start) :year)
                (plist-get (org-gcal--parse-date end)   :year))
@@ -593,12 +593,12 @@ TO.  Instead an empty string is returned."
                (plist-get (org-gcal--parse-date end)   :mon))
             (= (plist-get (org-gcal--parse-date start) :day)
                (plist-get (org-gcal--parse-date end)   :day)))
-           (concat "  SCHEDULED: <"
+           (concat "<"
                    (org-gcal--format-date start "%Y-%m-%d %a %H:%M")
                    "-"
                    (org-gcal--format-date end "%H:%M")
                    ">")
-         (concat "  SCHEDULED: " (org-gcal--format-iso2org start)
+         (concat (org-gcal--format-iso2org start)
                  "--"
                  (org-gcal--format-iso2org
                   (if (< 11 (length end))
