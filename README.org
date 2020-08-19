@@ -3,15 +3,45 @@
   - Fetch google calendar event
   - Post/edit org element
   - Sync between Org and Gcal
-    
+
+Data will be UTF-8 encoded for sync.
+
+* Getting Started
+
+Follow the instructions at [[#Installation][Installation]], and then run ~org-gcal-fetch~ to
+download Google Calendar events into your Org-mode files using the Google
+Calendar API. Run ~org-gcal-fetch~ to retrieve new events and update events
+already retrieved, and run ~org-gcal-post-at-point~ on an Org-mode headline
+corresponding to a downloaded event to push updates to the events on the Google
+Calendar API server.
+
+*First time setup:* on the initial run, in order to obtain the initial OAuth
+authorization, `org-gcal` will open a link in the browser to obtain authorization
+for the OAuth credentials generated in [[#Installation][Installation]]. You will probably see a
+screen that says "This app isn't verify". You will need to click on the
+"Advanced" link to authorize the application:
+
+[[file:https://user-images.githubusercontent.com/44981227/71685532-d892ce00-2d98-11ea-8981-1adce23e8678.png]]
+
 * Requirements
- 
+
 - [[https://github.com/tkf/emacs-request][tkf/emacs-request]]
 - [[https://github.com/jwiegley/alert][jwiegley/alert]]
+- [[https://elpa.gnu.org/packages/persist.html][~persist~]]
 
-  =org-gcal= is now available in the famous emacs package repo [[http://melpa.milkbox.net/][MELPA]], so the recommended way is to install it through Emacs package management system.
+  =org-gcal= is now available in the famous emacs package repo [[http://melpa.milkbox.net/][MELPA]], so the
+  recommended way is to install it through Emacs package management system.
+
+  NOTE: ~persist~ lives in GNU ELPA. If you're running Emacs 26.x with x < 3,
+  you may need to add ~(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")~
+  to your ~init.el~ to work around Emacs bug https://debbugs.gnu.org/34341
+  ([[https://www.reddit.com/r/emacs/comments/cdei4p/failed_to_download_gnu_archive_bad_request/][more info]]).
 
 * Installation
+:PROPERTIES:
+:ID:       f5de2e1e-80a1-4ee3-8eeb-fd4db0794448
+:CUSTOM_ID:  Installation
+:END:
 
 1. Go to [[https://console.developers.google.com/project][Google Developers Console]]
 
@@ -19,27 +49,46 @@
 
 3. Click on the project
 
-4. Click on *APIs & Auth* then *Credentials*
+4. Click on the hamburger menu at the upper-left, then *APIs & Services*, then
+   *Credentials*.
+   
+5. Set up a consent screen. Give the application a name and set it up as type
+   "external application", and accept the defaults for everything else. You
+   should not need to verify the application, because only your user will be
+   using it.
 
-5. Click on *Create New Client ID* with Application type /Installed application/, Installed application type /Other/
+6. Once you've set up a consent screen (this is required), click on *Create
+   Credentials* and *Oauth client ID* with Application type /Other/.
 
-6. Click on *Create Client ID*
+7. Click on *Create Client ID*
 
-7. Record the Client ID and Client secret for setup.
+8. Record the Client ID and Client secret for setup.
 
-8. Under the same *APIs & Auth* menu section, select *APIs*
+9. Under the same *APIs & Services* menu section, select *Library*
 
-9. Scroll down to *Calendar API*. Click the *Status* button to enable calendar API access to the app you created in steps 5 & 6.
+10. Scroll down to *Calendar API*. Click the *Enable* button to enable calendar
+    API access to the app you created in steps 5 & 6.
 
-   Go to [[https://www.google.com/calendar/render][Google setting page]] to check the calendar ID.
+    Go to [[https://www.google.com/calendar/render][Google setting page]] to
+    check the calendar ID.
 
-10. Go to [[https://www.google.com/calendar/render][Google setting page]] and click the gear-shaped settings icon in the upper right, then select "Settings" from the drop down list.
+11. Go to [[https://www.google.com/calendar/render][Google setting page]] and
+    click the gear-shaped settings icon in the upper right, then select
+    "Settings" from the drop down list.
 
-11. Select the "Calendars" tab, which will display a list of your calendars.
+12. Select the "Setting for my Calendars" tab on the left, which will
+    display a list of your calendars.
 
-12. Select the calendar you would like to synchronize with. This will take you to the "Calendar Details" page for that calendar. Near the end is a section titled "Calendar Address". Following the XML, ICAL, and HTML tags, you will see your Calendar ID.
+13. Select the calendar you would like to synchronize with. This will
+    take you to the "Calendar Settings" page for that calendar. Near
+    the end is a section titled "Integrate Calendar". Following the XML,
+    ICAL, and HTML tags, you will see your Calendar ID.
 
-13. Copy the Calendar ID for use in the settings below, where you will use it as the first element in the org-gcal-file-alist for associating calendars with specific org files. You can associate different calendars with different org files, so repeat this for each calendar you want to use.
+14. Copy the Calendar ID for use in the settings below, where you will
+    use it as the first element in the org-gcal-file-alist for
+    associating calendars with specific org files. You can associate
+    different calendars with different org files, so repeat this for
+    each calendar you want to use.
 
 ** Setting example
 
@@ -47,22 +96,255 @@
 (require 'org-gcal)
 (setq org-gcal-client-id "your-id-foo.apps.googleusercontent.com"
       org-gcal-client-secret "your-secret"
-      org-gcal-file-alist '(("your-mail@gmail.com" .  "~/schedule.org")
-                            ("another-mail@gmail.com" .  "~/task.org")))
+      org-gcal-fetch-file-alist '(("your-mail@gmail.com" .  "~/schedule.org")
+                                  ("another-mail@gmail.com" .  "~/task.org")))
 #+end_src
 
+** Multiple accounts
+
+   There's no support for multiple accounts.  If you want to use
+   org-gcal with calendars from different accounts, you can give
+   permissions to the account you configured via the calendar's
+   settings interface.
+
+   To get more detailed information you can [[https://digibites.zendesk.com/hc/en-us/articles/200299863-How-do-I-share-my-calendar-with-someone-else-Google-Calendar-or-Outlook-com-][check this link]].
+
+* Testing
+
+To execute compile and regression tests, run ~make~.
+
+This will use your existing Emacs installation to generate a value of
+~load-path~ that allows ~org-gcal~ to find all its dependencies, and save it to
+~.load-path.el~ in this directory. To delete this and other temporary files,
+run ~make clean~.
 
 * Usage
-** =org-gcal-sync=
-   Sync between Org and Gcal. before syncing,  execute =org-gcal-fetch= .
-** =org-gcal-fetch=
-   Fetch Google calendar events and populate =org-gcal-file-alist= locations. The org files in =org-gcal-file-alist= should be blank or all of their headlines should have timestamps.
-** =org-gcal-post-at-point=
-   Post/edit org block at point to Google calendar.
-** =org-gcal-delete-at-point=
-   Delete Gcal event at point.
-** =org-gcal-refresh-token=
-   Refresh the OAuth token. OAuth token expired in 3600 seconds, You should refresh token on a regular basis.
+** Getting started
 
-* Similar application
+Once you've set up the basic settings (see [[Setting example]]), you can run
+=org-gcal-fetch= to fetch events into the files configured in
+=org-gcal-fetch-file-alist=. After the initial fetch, running =org-gcal-fetch=
+will retrieve newly-created events and update already-fetched events.
+
+To create a Google Calendar event from an Org-mode event, it's enough to run the
+=org-gcal-post-at-point= command on a simple headline:
+
+#+BEGIN_SRC org
+  ,* Event title
+#+END_SRC
+
+This will prompt you for the calendar ID, start time, and end time of the event.
+Therefore, if you'd like to create an event without user interaction (from a
+template, for example), you should set these fields before running
+=org-gcal-post-at-point=:
+
+#+BEGIN_SRC org
+  ,* Event title
+  :PROPERTIES:
+  :calendar-id: jjjjjjjjjjjfuuuk842fdok134@group.calendar.google.com
+  :END:
+  :org-gcal:
+  <2020-07-15 wed 09:15-09:30>
+
+  Event details
+
+  (can be multiple paragraphs).
+  :END:
+#+END_SRC
+
+After the event has been created, some Google Calendar API-specific fields will
+be set for future updates to the event:
+
+#+BEGIN_SRC org
+  ,* Event title
+  :PROPERTIES:
+  :calendar-id: jjjjjjjjjjjfuuuk842fdok134@group.calendar.google.com
+  :ETag:     "7777777777980000"
+  :ID:       xxxxxxxxxxa4jlcj0v998f4u18/jjjjjjjjjjjfuuuk842fdok134@group.calendar.google.com
+  :END:
+  :org-gcal:
+  <2020-07-15 wed 09:15-09:30>
+
+  Event details
+
+  (can be multiple paragraphs).
+  :END:
+#+END_SRC
+
+If you want to schedule the event in your Org Agenda, you can use the SCHEDULED
+property (set by =org-schedule=) instead of storing the date in the =:org-gcal:=
+drawer. The drawer will still be present to contain event details:
+
+#+BEGIN_SRC org
+  ,* Event title
+  SCHEDULED: <2020-07-15 wed 09:15-09:30>
+  :PROPERTIES:
+  :calendar-id: jjjjjjjjjjjfuuuk842fdok134@group.calendar.google.com
+  :ETag:     "7777777777980000"
+  :ID:       xxxxxxxxxxa4jlcj0v998f4u18/jjjjjjjjjjjfuuuk842fdok134@group.calendar.google.com
+  :END:
+  :org-gcal:
+  Event details
+
+  (can be multiple paragraphs).
+  :END:
+#+END_SRC
+
+After editing an event in Org mode, you can also run =org-gcal-post-at-point= to
+update the event on Google Calendar. The command =org-gcal-sync= does what
+=org-gcal-fetch= does, but also runs =org-gcal-post-at-point= on all events that
+you've edited in Org mode to update the corresponding events in Google Calendar.
+
+** Event structure
+=org-gcal= modifies the following Org-mode properties and drawers when updating
+an event from the Google Calendar API:
+
+- Title :: contains the event summary (minus any TODO keywords or tags).
+- Timestamps:
+  - =SCHEDULED= :: if the =SCHEDULED= attribute of a headline is present,
+    =org-gcal= will maintain the start and end times of an event there rather
+    than in a timestamp in the =org-gcal= drawer (see below).
+- Properties:
+  - =calendar-id= (can be modified using the [[help:org-gcal-calendar-id-property][=org-gcal-calendar-id-property=]]
+    variable) :: contains the calendar ID of the calendar on which the event is
+    maintained.
+  - =ETag= (can be modified using the [[help:org-gcal-etag-property][=org-gcal-etag-property=]]
+    variable) :: contains the most recent ETag retrieved from the Google Calendar
+    API for the event (see [[https://developers.google.com/calendar/v3/version-resources#conditional_modification][the Google Calendar API documentation]]). Used to
+    support automatically updating the headline using the most recent event data
+    from the API if it has changed on the server since it was last retrieved.
+    
+    **NOTE**: If the =ETag= property is present on a headline (even if empty (=""=)) and not equal to the value
+    stored by the Calendar API, your event will be **overwritten** with the data from the server. In this case,
+    you'll see a notification for a HTTP 512. This is intended behavior. If your event is being overwritten when
+    you don't want it, remove the =ETag= property from your headline.
+  - =ID= :: contains =<event_id>/<calendar_id>= of the event, as provided by the
+    Google Calendar API. Don't change the ID manually, or else the event won't be
+    able to retrieved or updated from the headline.
+- Drawers:
+  - =org-gcal= (can be modified using the [[help:org-gcal-drawer-name][=org-gcal-drawer-name=]] variable) ::
+    contains the event description. Unless the timestamp is maintained using
+    =SCHEDULED=, the initial line of this drawer contains the event start and
+    end time, with the event description starting in the next paragraph.
+
+Apart from these, all other attributes are preserved when an event is updated
+in any way.
+
+** Commands
+*** =org-gcal-fetch=
+   Fetch Google calendar events for all calendar IDs in =org-gcal-file-alist=
+   occurring between =org-gcal-up-days= before today and =org-gcal-down-days=
+   after today. If the events have already been retrieved and can be located
+   using their Org-mode headline IDs, update the event in place. Otherwise,
+   insert it at the end of the file corresponding to the event's calendar ID in
+   =org-gcal-file-alist=. Does not update events on the server.
+*** =org-gcal-sync=
+   Like =org-gcal-fetch=, but also update events on the server if they have
+   changed locally.
+*** =org-gcal-fetch-buffer=
+   Fetch changes to Google calendar events to update entries in the current
+   buffer, but don't update events on server.
+*** =org-gcal-sync-buffer=
+   Sync entries in the current buffer with Google Calendar.
+*** =org-gcal-post-at-point=
+   Update the event represented by the Org-mode headline at POINT on the server
+   using the Google Calendar API.
+
+   If the event has changed on the server since it was last retrieved (detected
+   using the =ETag= property), automatically update the headline using the
+   event data from the server instead of updating the event on the server.
+*** =org-gcal-delete-at-point=
+   Delete the event represented by the Org-mode headline at POINT on the server
+   using the Google Calendar API. This will not delete the Org-mode headline.
+
+   If the event has changed on the server since it was last retrieved (detected
+   using the =ETag= property), automatically update the headline using the
+   event data from the server instead of updating the event on the server.
+*** =org-gcal-request-token=
+   Request new OAuth access and refresh tokens. You should not need to call
+   this function in normal use, since it is called automatically on the first
+   run. However, you can call it again if for some reason the tokens stop
+   working. This should be rare - =org-gcal= will automatically refresh the
+   OAuth access token when it expires (every 3600 seconds).
+
+** Deleting events
+
+If an event is deleted on the server, then updating an event (via
+=org-gcal-post-at-point=, =org-gcal-sync=, etc.) will optionally cancel and
+delete the corresponding Org mode headlines:
+
+- =org-gcal-update-cancelled-events-with-todo=: if set (the default), mark all
+  cancelled events with the =org-gcal-cancelled-todo-keyword= (default:
+  =CANCELLED=). This keyword must be one defined in =org-todo-keywords= or it
+  will be ignored.
+- =org-gcal-remove-api-cancelled-events=: if set, delete Org headlines of
+  cancelled events. The default value is ='ask=, which means to prompt for
+  deletion.
+- =org-gcal-remove-events-with-cancelled-todo=: by default, avoid deleting Org
+  headlines of events that are marked with =org-gcal-cancelled-todo-keyword=
+  beforehand, to allow preserving a headline for a cancelled event from being
+  deleted. Setting this to =t= always deletes headlines, even already cancelled
+  ones.
+
+* Other features
+** Minimize alerts
+
+Modify =org-gcal-notify-p= from =t= to =nil=
+
+** Collect instances of recurring events under parent event
+
+By default, =org-gcal-recurring-events-mode= is set to ='top-level=, which means
+that new fetched events that are instances of recurring events will be inserted
+at the top level of the file for the calendar ID configured in
+=org-gcal-fetch-file-alist=:
+
+#+BEGIN_SRC org
+  ,* Meeting
+  SCHEDULED: <2020-08-07 Fri 11:00>
+  ,* Meeting
+  SCHEDULED: <2020-08-14 Fri 11:00>
+  ,* Meeting
+  SCHEDULED: <2020-08-21 Fri 11:00>
+  ,* Meeting
+  SCHEDULED: <2020-08-28 Fri 11:00>
+#+END_SRC
+
+If =org-gcal-recurring-events-mode= is instead set to ='nested=, such events
+will be inserted as Org-mode child headlines under the headline for the parent
+event:
+
+#+BEGIN_SRC org
+  ,* Meeting
+  SCHEDULED: <2017-02-17 Fri 11:00>
+  ,** Meeting
+  SCHEDULED: <2020-08-07 Fri 11:00>
+  ,** Meeting
+  SCHEDULED: <2020-08-14 Fri 11:00>
+  ,** Meeting
+  SCHEDULED: <2020-08-21 Fri 11:00>
+  ,** Meeting
+  SCHEDULED: <2020-08-28 Fri 11:00>
+#+END_SRC
+
+Here the parent meeting has been running for several years, but only the
+instances of the meeting in the range given by =org-gcal-down-days= and
+=org-gcal-up-days= are fetched.
+
+* Errors
+** Duplicate ID
+
+You get an error like this:
+
+#+BEGIN_EXAMPLE
+  Duplicate ID "FOO", also in file BAR
+#+END_EXAMPLE
+
+Most likely, this means some calendar events were mistakenly retrieved twice
+(for example, if you ran =org-gcal-fetch= on different computers). Search your
+Org-mode files for the duplicate ID "FOO" and delete one of the headlines with
+duplicate IDs (or just change the =ID= property on one of the events to
+something else).
+
+
+* Similar applications
   [[https://github.com/dengste/org-caldav][dengste/org-caldav]]
